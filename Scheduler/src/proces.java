@@ -24,10 +24,13 @@ public class proces {
 	}
 	
 	public int getCzasPrzyjscia(){
-		return this.czas_przyjscia;
+		return this.czas;
 	}
 	public int getPriorytet(){
 		return this.priorytet;
+	}
+	public int getID(){
+		return this.id;
 	}
 	
 	public void run(){
@@ -50,12 +53,13 @@ public class proces {
 			System.out.println(" ");
 		}
 	}
-public static Boolean NiePustaKolejka[];
+public static Boolean NiePustaKolejka[] = new Boolean[16];
 public ArrayList<proces> KolejkaGotowychProcesow = new ArrayList<proces>();
-public ArrayList<proces>KolejkaProcesow= new ArrayList<proces>();
-public static ArrayList<List<proces>> tab = new ArrayList<List<proces>>();
-public ListIterator it ;
-public int ZnajdzMaxPriorytet(){
+//public ArrayList<proces>KolejkaProcesow= new ArrayList<proces>();
+public static ArrayList<List<proces>> tab ;
+static ArrayList<proces> group[] = new ArrayList[16];
+public static ListIterator it ;
+public static int ZnajdzMaxPriorytet(){
 	
 	for (int i =15; i>0;i--){
 		if(NiePustaKolejka[i]=true){
@@ -66,7 +70,7 @@ public int ZnajdzMaxPriorytet(){
 }
 public static void SetZeroBitTab(){
 	for(int i = 15;i>0;i--){
-		if (tab.get(i).isEmpty()){
+		if (group[i].isEmpty()){
 			NiePustaKolejka[i]= false;
 		}else{
 			NiePustaKolejka[i]= true;
@@ -74,39 +78,50 @@ public static void SetZeroBitTab(){
 	}
 }
 
-public void SetZeroBitTabPriority(int p){
-	if (tab.get(p).isEmpty()){
+public static void SetZeroBitTabPriority(int p){
+	if (group[p].isEmpty()){
 		NiePustaKolejka[p] = false;
 	}else{
 		NiePustaKolejka[p]= true;
 	}
 }
-public static void NowyProces(int priorytet, int rozmiar, int id, int czasPrzyjscia){
+public static void NowyProces(int id,int priorytet,int czasPrzyjscia, int rozmiar){
+	//tab.
 	proces e = new proces(priorytet, czasPrzyjscia,rozmiar,id);
-	tab.get(priorytet).add(e);
+	group[priorytet].add(e);
 	SetZeroBitTab();
+}
+public static void init(){
+	for(int i=0;i<=15;i++){
+		for(int x = 0; x < group.length; x++){
+	        group[x] = new ArrayList<>();
+	    }
+	}
 }
 public static void WyswietlListe(){
 	
 	System.out.println();
 	for (int i = 15; i > 0; i--){
-		//it =  tab.listIterator();
-		System.out.println("PRIORYTET: "+i);
-		for (int x=0;x<=tab.get(i).size();x++){			
-			System.out.println("Proces: "+tab.get(i).get(x).id+"  Priorytet: "+tab.get(i).get(x).priorytet+" Pozostaly czas:  " +tab.get(i).get(x).czas);
+		if(group[i].isEmpty()){
+			System.out.println("PRIORYTET: "+i);}
+		else{
+		for (int x=0;x<group[i].size();++x){	
+			System.out.println("PRIORYTET: "+i);
+			//System.out.println(group[i]);
+			System.out.println("Proces: "+group[i].get(x).getID()+"  Priorytet: "+group[i].get(x).getPriorytet()+" Pozostaly czas:  " +group[i].get(x).getCzasPrzyjscia());
+		}
 		}
 		}
 	System.out.println();
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		int balans =0;
 		int time = 0;
 		
 		int id = 0;
 		Scanner scan = new Scanner(System.in);
 		int prio, size, klaw;
+		init();
 		
 		while(true){
 			System.out.println("1: Dodaj proces, 2 : wyswietl liste, 3: nastepny krok: ");
@@ -117,13 +132,35 @@ public static void WyswietlListe(){
 				prio = scan.nextInt();
 				System.out.print("Podaj dlugosc procesu: ");
 				size = scan.nextInt();
-				NowyProces(prio,size,id,time);
-				time++;
+				NowyProces(id,prio,size, time);
+				time--;
 				id++;
 				break;
 				}
 			case 2: {
 				WyswietlListe();
+				break;
+			}
+			case 3: {
+				int Priorytet = ZnajdzMaxPriorytet();
+				
+				if (Priorytet == -1){
+					System.out.println("Brak procesow");
+					break;
+				}
+				
+				group[Priorytet].get(0).run();
+				
+				if(group[Priorytet].get(0).koniec ==true){
+					group[Priorytet].remove(0);
+					SetZeroBitTabPriority(Priorytet);
+				}
+				else if (group[Priorytet].get(0).priorytet != group[Priorytet].get(0).priorytet_bazowy){
+					int tmp = group[Priorytet].get(0).getPriorytet();
+					int tmp2 = group[Priorytet].get(0).priorytet = group[Priorytet].get(0).priorytet-1;
+				}
+				
+				
 			}
 			}
 		}
